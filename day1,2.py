@@ -1,0 +1,10 @@
+print("Hello,计算机")
+name=input("请输入你的名字：")
+major=input("请输入你的专业：")
+print(f"你好，{name}！你的专业是{major}。")
+print("从今天开始，我要用计算机做点东西。")
+print("--- 欢迎来到年龄计算器 ---")
+name = input("请输入你的名字：")
+age = int(input("请输入你今年的年龄：")) 
+next_year_age = age + 1
+print(f"{name}，你明年就 {next_year_age} 岁了！")
