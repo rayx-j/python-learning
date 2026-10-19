@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>我的个人主页</title>
+        <style>
+        /* 这里是 CSS 代码 */
+        body {
+            background-color: #f0f8ff; /* 背景色：淡淡的爱丽丝蓝 */
+            font-family: "Microsoft YaHei", sans-serif; /* 字体：微软雅黑 */
+            text-align: center; /* 所有文字居中 */
+            padding: 50px; /* 距离页面顶部留出距离 */
+        }
+
+        h1 {
+            color: #2e8b57; /* 标题颜色：海洋绿 */
+            font-size: 40px; /* 字体放大 */
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555; /* 段落颜色：深灰色 */
+            font-size: 18px;
+        }
+
+        h2 {
+            color: #3cb371;
+            margin-top: 40px;
+        }
+
+        ul {
+            list-style-type: none; /* 去掉列表前面的小黑点 */
+            padding: 0;
+        }
+
+        li {
+            background-color: white; /* 列表项背景变白 */
+            margin: 10px auto; /* 列表项间距 */
+            padding: 10px;
+            width: 300px; /* 固定宽度 */
+            border-radius: 8px; /* 圆角 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 加上淡淡的阴影 */
+            color: #333;
+        }
+
+        button {
+            background-color: #2e8b57; /* 按钮背景色 */
+            color: white; /* 按钮文字白色 */
+            padding: 12px 24px; /* 按钮大小 */
+            border: none; /* 去掉默认边框 */
+            border-radius: 25px; /* 按钮变圆角 */
+            font-size: 16px;
+            cursor: pointer; /* 鼠标移上去变成小手 */
+            margin-top: 30px;
+        }
+
+        button:hover {
+            background-color: #236b43; /* 鼠标悬停时按钮颜色变深 */
+        }
+    </style>
+</head>
+<body>
+    <h1>你好，我是 rayx！</h1>
+    
+    <p>欢迎来到我的第一个网页。我是一名园林专业的学生，正在学习编程。</p>
+    
+    <h2>我的目标</h2>
+    <ul>
+        <li>学会写代码</li>
+        <li>做出好看的网站和 App</li>
+        <li>用 AI 和算法解决园林生态问题</li>
+    </ul>
+    
+    <button onclick="sayHello()">点我一下</button>
+        <script>
+        // 这是 JavaScript 代码
+        function sayHello() {
+            // 相当于 Python 里的 input，接收用户输入
+            let name = prompt("请输入你的名字：");
+            
+            // 如果用户输入了名字，而且没点取消
+            if (name != null && name != "") {
+                alert("你好，" + name + "！欢迎来到我的网页。");
+            }
+        }
+    </script>
+</body>
+</html>
