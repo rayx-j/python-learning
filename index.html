@@ -33,7 +33,9 @@
             background-color: white; /* 列表项背景变白 */
             margin: 10px auto; /* 列表项间距 */
             padding: 10px;
-            width: 300px; /* 固定宽度 */
+                       width: fit-content;
+            min-width: 200px; /* 保证最短也不会太窄 */
+            padding: 10px 20px; /* 左右留点空隙 */
             border-radius: 8px; /* 圆角 */
             box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 加上淡淡的阴影 */
             color: #333;
@@ -62,47 +64,130 @@
         <li>做出好看的网站和 App</li>
         <li>用 AI 和算法解决园林生态问题</li>
     </ul>
-    <input type="text" id="plantInput" placeholder="输入植物名字...">
-    <button onclick="addPlant()">添加植物</button>
+        <div style="margin-top: 30px;">
+        <input type="text" id="plantInput" placeholder="输入植物名字...">
+        <!-- 👇 新加的输入框 👇 -->
+        <input type="number" id="moistureInput" placeholder="最低湿度%" style="width: 80px;">
+        <button onclick="addPlant()">添加植物</button>
+    </div>
     <ul id="plantList">
         <!-- 这里以后会自动长出列表项 -->
     </ul>
          <script>
-        function addPlant() {
-            // 1. 找到输入框
-            let input = document.getElementById("plantInput");
-            // 2. 获取用户输入的文字
-            let plantName = input.value; 
-             // 如果输入为空，就不添加
-            if (plantName === "") {
-                alert("请输入植物名字！");
+                     function addPlant() {
+            let name = document.getElementById("plantInput").value;
+            let moisture = document.getElementById("moistureInput").value;
+            
+            if (name === "" || moisture === "") {
+                alert("请把名字和湿度填完整！");
                 return;
             }
-            // 3. 找到列表容器
-            let ul = document.getElementById("plantList");
-            // 4. 创建一个新的列表项 <li>
-            let li = document.createElement("li");
-            // 5. 把文字塞进列表项里
-            li.innerText = plantName;
-            // 6. 把做好的列表项加到 ul 里面
-            ul.appendChild(li);
-                        // 弄一个删除按钮
-            let delBtn = document.createElement("button");
-            delBtn.innerText = "删除";
-                        // 给删除按钮单独加点样式
-            delBtn.style.marginLeft = "15px"; // 往左边挤一挤
-            delBtn.style.padding = "5px 10px"; // 按钮变小巧一点
-            delBtn.style.backgroundColor = "#e74c3c"; // 变成警示红色
-            delBtn.style.fontSize = "14px"; // 字小一点
-            // 当点击这个删除按钮时，把当前的 li 删掉
-            delBtn.onclick = function() {
-                ul.removeChild(li);
-            };           
-            // 把删除按钮也塞进卡片里
-            li.appendChild(delBtn);
-            // 7. 清空输入框，方便下一次输入
-            input.value = "";
+
+            fetch('http://127.0.0.1:5000/add_plant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, min_moisture: parseInt(moisture) })
+            })
+            .then(res => res.json())
+            .then(data => {
+                // 添加成功后，直接刷新整个网页
+                window.location.reload(); 
+            })
+            .catch(error => console.error("出错了：", error));
         }
+                // 网页加载完毕后，自动去服务器拿数据
+                window.onload = function() {
+            fetch('http://127.0.0.1:5000/get_plants')
+            .then(res => res.json())
+            .then(data => {
+                let ul = document.getElementById("plantList");
+                ul.innerHTML = ""; // 每次加载先清空网页，防止重复显示
+                
+                data.forEach(plant => {
+                                     let li = document.createElement("li");
+                    // 1. 单独创建一个 span 标签装文字，方便以后只改文字，不影响按钮
+                    let textSpan = document.createElement("span");
+                    textSpan.innerText = `${plant.name} (最低湿度:${plant.min_moisture}%)`;
+                    li.appendChild(textSpan); // 把文字放进卡片里
+                    
+                    // 删除按钮的样式（按昨天的极简版）
+                                        // 👇 新增：模拟传感器按钮 👇
+                    let sensorBtn = document.createElement("button");
+                    sensorBtn.innerText = "模拟检测";
+                    sensorBtn.style.marginLeft = "15px";
+                    sensorBtn.style.padding = "5px 10px";
+                    sensorBtn.style.marginTop = "0px";
+                    sensorBtn.style.backgroundColor = "#3498db"; // 蓝色
+                    sensorBtn.style.color = "white";
+                    sensorBtn.style.fontSize = "14px";
+                    
+                    // 点击按钮，弹出输入框模拟真实湿度
+                    sensorBtn.onclick = function() {
+                        let currentMoisture = prompt(`请输入【${plant.name}】当前的实际土壤湿度（0-100）：`);
+                        
+                        // 如果用户点了取消或者没填，就不往下执行
+                        if(currentMoisture === null || currentMoisture === "") return; 
+                        
+                        // 把当前湿度发给后端判断
+                        fetch('http://127.0.0.1:5000/check_moisture', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                name: plant.name, 
+                                current_moisture: parseInt(currentMoisture) 
+                            })
+                        })
+                        .then(res => res.json())
+                                               .then(data => {
+                            if (data.status === "warning") {
+                                // 缺水警报：卡片变红
+                                li.style.backgroundColor = "#ffe5e5";
+                                li.style.border = "2px solid #e74c3c";
+                                textSpan.innerText = `🚨 ${plant.name} 缺水啦! (需:${plant.min_moisture}%)`;
+                                textSpan.style.color = "#c0392b";
+                            } 
+                            else if (data.status === "ok") {
+                                // 正常状态：恢复白底
+                                li.style.backgroundColor = "white";
+                                li.style.border = "none";
+                                textSpan.innerText = `✅ ${plant.name} 水分充足 (需:${plant.min_moisture}%)`;
+                                textSpan.style.color = "#333";
+                            }
+                        });
+                    };
+                    
+                    // 把传感器按钮塞进卡片里
+                    li.appendChild(sensorBtn); 
+                    // 👆 新增结束 👆
+                    // 下面是你原本的删除按钮代码...
+                    let delBtn = document.createElement("button");
+                    delBtn.innerText = "删除";
+                    delBtn.style.marginLeft = "15px";
+                    delBtn.style.padding = "5px 10px";
+                    delBtn.style.marginTop = "0px"; 
+                    delBtn.style.backgroundColor = "#e74c3c";
+                    delBtn.style.fontSize = "14px";
+                                       delBtn.onclick = function() {
+                        // 通知后端从数据库中删除
+                        fetch('http://127.0.0.1:5000/delete_plant', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name: plant.name })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            // 后端删成功后，前端才移除卡片
+                            if (data.status === "success") {
+                                ul.removeChild(li);
+                            }
+                        });
+                    };
+                    
+                    li.appendChild(delBtn);
+                    ul.appendChild(li);
+                });
+            });
+        };
     </script>
 </body>
 </html>
