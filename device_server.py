@@ -102,4 +102,7 @@ def check_moisture():
             "message": f"✅ 湿度正常，植物很健康。(当前:{current_moisture}%)"
         })
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    import os
+    # 让云端平台自己分配端口，如果没有就默认用 5000
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
