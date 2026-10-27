@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>我的个人主页</title>
-        <style>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <style>  
         /* 这里是 CSS 代码 */
         body {
             background-color: #f0f8ff; /* 背景色：淡淡的爱丽丝蓝 */
@@ -73,7 +75,51 @@
     <ul id="plantList">
         <!-- 这里以后会自动长出列表项 -->
     </ul>
+    <div id="main" style="width: 100%; max-width: 600px; height: 300px; margin: 30px auto; display: none;"></div>
          <script>
+                    // 定义全局变量，用来存所有测过的湿度数据
+        let chartData = [];
+        let chartInstance = null;
+
+        // 专门用来画图表的函数
+        function renderChart() {
+            let chartDom = document.getElementById('main');
+            chartDom.style.display = 'block'; // 解除隐藏，把图表露出来
+            
+            // 初始化 ECharts 实例
+            if (!chartInstance) {
+                chartInstance = echarts.init(chartDom);
+            }
+
+            // 配置图表的样子
+            let option = {
+                title: { text: '土壤湿度监测历史' },
+                tooltip: { trigger: 'axis' },
+                xAxis: {
+                    type: 'category',
+                    data: Array.from({length: chartData.length}, (_, i) => `第${i+1}次`), // 横坐标：第1次，第2次...
+                    name: '检测次数'
+                },
+                yAxis: {
+                    type: 'value',
+                    min: 0,
+                    max: 100,
+                    name: '湿度(%)'
+                },
+                series: [
+                    {
+                        data: chartData,
+                        type: 'line', // 折线图
+                        smooth: true, // 线条平滑
+                        itemStyle: { color: '#2e8b57' }, // 跟你网页主题一样的绿色
+                        areaStyle: { color: '#e0f2e9' } // 线条下面加一层浅绿色阴影
+                    }
+                ]
+            };
+
+            // 渲染图表
+            chartInstance.setOption(option);
+        }
                      function addPlant() {
             let name = document.getElementById("plantInput").value;
             let moisture = document.getElementById("moistureInput").value;
@@ -153,6 +199,8 @@
                                 textSpan.innerText = `✅ ${plant.name} 水分充足 (需:${plant.min_moisture}%)`;
                                 textSpan.style.color = "#333";
                             }
+                            chartData.push(parseInt(currentMoisture));
+                            renderChart(); 
                         });
                     };
                     
