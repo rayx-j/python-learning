@@ -2,80 +2,195 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>我的个人主页</title>
+    <title>智慧园林监测系统</title>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     
     <style>  
         /* 这里是 CSS 代码 */
-        body {
-            background-color: #f0f8ff; /* 背景色：淡淡的爱丽丝蓝 */
-            font-family: "Microsoft YaHei", sans-serif; /* 字体：微软雅黑 */
-            text-align: center; /* 所有文字居中 */
-            padding: 50px; /* 距离页面顶部留出距离 */
-        }
-        h1 {
-            color: #2e8b57; /* 标题颜色：海洋绿 */
-            font-size: 40px; /* 字体放大 */
-            margin-bottom: 10px;
-        }
-
-        p {
-            color: #555; /* 段落颜色：深灰色 */
-            font-size: 18px;
-        }
-        h2 {
-            color: #3cb371;
-            margin-top: 40px;
-        }
-        ul {
-            list-style-type: none; /* 去掉列表前面的小黑点 */
+              * {
+            box-sizing: border-box;
+            margin: 0;
             padding: 0;
         }
-        li {
-            background-color: white; /* 列表项背景变白 */
-            margin: 10px auto; /* 列表项间距 */
-            padding: 10px;
-                       width: fit-content;
-            min-width: 200px; /* 保证最短也不会太窄 */
-            padding: 10px 20px; /* 左右留点空隙 */
-            border-radius: 8px; /* 圆角 */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 加上淡淡的阴影 */
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f4f7f6; /* 极简灰白背景 */
             color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
+
+        /* 顶部标题栏 */
+        header {
+            background-color: #1e5631; /* 专业的深绿色 */
+            color: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 14px;
+            color: #a3c9a8;
+        }
+
+        /* 主体分栏 */
+        .dashboard {
+            display: flex;
+            flex: 1;
+            padding: 20px 40px;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* 面板通用样式 */
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        /* 左侧面板占 40% */
+        .left-panel {
+            flex: 4;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 右侧面板占 60% */
+        .right-panel {
+            flex: 6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #1e5631;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 15px;
+        }
+
+        /* 输入区 */
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input:focus {
+            border-color: #1e5631;
+        }
+
+        #plantInput {
+            flex: 2;
+        }
+
+        #moistureInput {
+            flex: 1;
+            max-width: 100px;
+        }
+
         button {
-            background-color: #2e8b57; /* 按钮背景色 */
-            color: white; /* 按钮文字白色 */
-            padding: 12px 24px; /* 按钮大小 */
-            border: none; /* 去掉默认边框 */
-            border-radius: 25px; /* 按钮变圆角 */
-            font-size: 16px;
-            cursor: pointer; /* 鼠标移上去变成小手 */
-            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #1e5631;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
         }
+
         button:hover {
-            background-color: #236b43; /* 鼠标悬停时按钮颜色变深 */
+            background-color: #143d22;
+        }
+
+        /* 列表卡片 */
+        ul {
+            list-style: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        li {
+            background: #fafafa;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border-left: 5px solid #1e5631;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        
+        /* 临时应对 JS 生成的样式 */
+        li span {
+            font-weight: bold;
+            color: #333;
         }
     </style>
 </head>
 <body>
-    <h1>你好，我是 rayx！</h1>
-    <p>欢迎来到我的第一个网页。我是一名园林专业的学生，正在学习编程。</p>
-    <h2>我的目标</h2>
-    <ul>
-        <li>学会写代码</li>
-        <li>做出好看的网站和 App</li>
-        <li>用 AI 和算法解决园林生态问题</li>
-    </ul>
-        <div style="margin-top: 30px;">
-        <input type="text" id="plantInput" placeholder="输入植物名字...">
-        <!-- 👇 新加的输入框 👇 -->
-        <input type="number" id="moistureInput" placeholder="最低湿度%" style="width: 80px;">
-        <button onclick="addPlant()">添加植物</button>
-    </div>
-    <ul id="plantList">
-        <!-- 这里以后会自动长出列表项 -->
-    </ul>
-    <div id="main" style="width: 100%; max-width: 600px; height: 300px; margin: 30px auto; display: none;"></div>
+    <header>
+        <h1>🌿 智慧园林微环境监测系统</h1>
+        <p>Smart Garden IoT Monitoring Dashboard v1.0</p>
+    </header>
+
+    <!-- 主体分栏布局 -->
+    <main class="dashboard">
+        <!-- 左侧：控制面板 -->
+        <section class="panel left-panel">
+            <h2>植物养护管理</h2>
+            
+            <div class="input-section">
+                <input type="text" id="plantInput" placeholder="输入植物名称">
+                <input type="number" id="moistureInput" placeholder="需求湿度(%)">
+                <button onclick="addPlant()">添加植物</button>
+            </div>
+
+            <ul id="plantList">
+                <!-- 卡片列表会自动生成在这里 -->
+            </ul>
+        </section>
+
+        <!-- 右侧：数据可视化面板 -->
+        <section class="panel right-panel">
+            <h2>湿度趋势分析</h2>
+            <p class="subtitle">*点击左侧卡片的“模拟检测”生成实时数据</p>
+            <!-- 图表容器 -->
+            <div id="main" style="width: 100%; height: 400px; display: none;"></div>
+        </section>
+    </main>
+
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- 你的业务 JS 逻辑代码保持原样，放在这里 -->
          <script>
                     // 定义全局变量，用来存所有测过的湿度数据
         let chartData = [];
