@@ -2,17 +2,16 @@ import network
 import time
 import urequests
 import json
-from machine import Pin, ADC
+from machine import Pin, ADC, deepsleep
 
+# 设置传感器和灯
 sensor = ADC(Pin(36))
 sensor.atten(ADC.ATTN_11DB)
-
-# 👇 新增：设置板载蓝色小灯（GPIO 2） 👇
 led = Pin(2, Pin.OUT)
-led.value(0) # 默认关灯
+led.value(0) 
 
-WIFI_SSID = "你的WiFi名字"
-WIFI_PASS = "你的WiFi密码"
+WIFI_SSID = "荣耀X50" # 记得改
+WIFI_PASS = "12345678" # 记得改
 SERVER_URL = "http://rayx360.pythonanywhere.com/check_moisture"
 PLANT_NAME = "笔尖茉莉"
 
@@ -22,17 +21,16 @@ def connect_wifi():
     if not wlan.isconnected():
         print('正在连接WiFi...')
         wlan.connect(WIFI_SSID, WIFI_PASS)
-        for _ in range(15):
+        for _ in range(10): # 最多等10秒，防止死机
             if wlan.isconnected(): break
             time.sleep(1)
             print('.', end='')
-    print('\nWiFi连接成功!' if wlan.isconnected() else '\nWiFi连接超时！')
     return wlan.isconnected()
 
-connect_wifi()
-print("硬件启动...")
+print("硬件唤醒...")
 
-while True:
+if connect_wifi():
+    # 1. 读取真实湿度
     raw_value = sensor.read()
     dry_val = 2500
     wet_val = 1000
@@ -40,29 +38,35 @@ while True:
     if moisture > 100: moisture = 100
     if moisture < 0: moisture = 0
 
+    print(f"当前湿度: {moisture}%")
+
+    # 2. 边缘计算：如果湿度低于40%，自动开启“水泵”（蓝灯亮5秒）
+    if moisture < 40:
+        print("🚨 湿度低于40%，正在自动浇水（亮灯模拟）...")
+        led.value(1)
+        time.sleep(5) # 模拟浇水5秒
+        led.value(0)
+    else:
+        print("水分充足，不用浇水。")
+
+    # 3. 把数据发给云端
     try:
-        # 发送数据，并接收云端的指令
         response = urequests.post(
             SERVER_URL,
             data=json.dumps({"name": PLANT_NAME, "current_moisture": moisture}),
             headers={'Content-Type': 'application/json'}
         )
-        # 👇 新增：解析云端返回的 JSON 数据 👇
-        result = response.json()
+        print("云端回复:", response.status_code)
         response.close()
-        
-        # 👇 新增：如果云端说开灯，就开灯；说关灯，就关灯 👇
-        if result.get("led_status") == "on":
-            if led.value() == 0:
-                print("💡 收到云端指令：开灯！")
-                led.value(1)
-        else:
-            if led.value() == 1:
-                print("🌑 收到云端指令：关灯！")
-                led.value(0)
-
-        print(f"湿度: {moisture}% | 发送成功！")
     except Exception as e:
-        print("网络波动，等会重试:", e)
+        print("发送失败:", e)
 
-    time.sleep(5) # 为了快速测试，改成5秒发一次
+else:
+    print("WiFi连接失败，跳过本次发送。")
+
+# 4. 核心魔法：进入深度睡眠！
+print("进入深度睡眠 10 秒...")
+time.sleep(1) # 给串口打印留一点时间
+# 这里的时间单位是微秒，10 * 1000000 = 10秒
+# 以后如果是 12 小时，就改成 12 * 60 * 60 * 1000000
+deepsleep(10 * 1000000) 

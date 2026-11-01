@@ -189,6 +189,7 @@
         <section class="panel right-panel">
             <h2>湿度趋势分析</h2>
             <p class="subtitle">*点击左侧卡片的“模拟检测”生成实时数据</p>
+            <div id="gauge" style="width: 100%; height: 250px; margin-bottom: 20px;"></div>
             <!-- 图表容器 -->
             <div id="main" style="width: 100%; height: 400px; display: none;"></div>
         </section>
@@ -240,6 +241,37 @@
 
             // 渲染图表
             chartInstance.setOption(option);
+            let gaugeDom = document.getElementById('gauge');
+            let myGauge = echarts.init(gaugeDom);
+            // 获取数组里的最后一个数值作为当前湿度
+            let currentMoisture = chartData.length > 0 ? chartData[chartData.length - 1] : 0;
+
+            let gaugeOption = {
+                series: [{
+                    type: 'gauge',
+                    startAngle: 180,
+                    endAngle: 0,
+                    min: 0,
+                    max: 100,
+                    splitNumber: 10,
+                    itemStyle: { color: '#2e8b57' }, // 绿色
+                    progress: { show: true, width: 18 },
+                    pointer: { show: true },
+                    axisLine: { lineStyle: { width: 18 } },
+                    axisTick: { show: false },
+                    splitLine: { length: 15, lineStyle: { width: 2, color: '#999' } },
+                    axisLabel: { distance: 25, color: '#999', fontSize: 12 },
+                    title: { show: false },
+                    detail: {
+                        valueAnimation: true,
+                        formatter: '{value}%',
+                        fontSize: 30,
+                        offsetCenter: [0, '70%']
+                    },
+                    data: [{ value: currentMoisture }]
+                }]
+            };
+            myGauge.setOption(gaugeOption);
         }
                      function addPlant() {
             let name = document.getElementById("plantInput").value;
